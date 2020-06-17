@@ -16,10 +16,10 @@ class ImageProcessing {
 	public:
 		explicit ImageProcessing(const Parameters& params);
 
-		std::vector<size_t> create_mask(
+		std::vector<unsigned int> create_mask(
 			const byte* image_data,
-			size_t width, size_t height,
-			size_t num_peaks_x, size_t num_peaks_y
+			unsigned int width, unsigned int height,
+			unsigned int num_peaks_x, unsigned int num_peaks_y
 		) const;
 
 

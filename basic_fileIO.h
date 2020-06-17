@@ -9,14 +9,11 @@
 #include <functional> // function
 #include <type_traits> // std::is_integral, std::is_floating_point
 #include <iomanip> // std::setw, std::stprecision
-#include "Constants.h"
+#include <filesystem>
 
 #include <Windows.h>
-#include "CUDAArray.hpp"
 
-
-//#include "C:\Users\maxko\SLM-codebase-dev\projects\GUI\GUI\bitTypes.h"
-//#include <wingdi.h>
+using byte = unsigned char;
 
 namespace basic_fileIO {
 	// Useful for debugging
@@ -24,12 +21,12 @@ namespace basic_fileIO {
 	// to first element and pointer to first + array-size
 	template<class InputIt>
 	void save_one_column_data(
-		const std::string& filename, 
+		const std::string& filename,
 		const InputIt first, const InputIt last
 	) {
 		static_assert(
-			std::is_integral<typename std::iterator_traits<InputIt>::value_type>::value ||
-			std::is_floating_point<typename std::iterator_traits<InputIt>::value_type>::value,
+			std::is_integral_v<typename std::iterator_traits<InputIt>::value_type> ||
+			std::is_floating_point_v<typename std::iterator_traits<InputIt>::value_type>,
 			"print_data: Data type must be integral or floating point"
 			);
 
@@ -54,10 +51,10 @@ namespace basic_fileIO {
 	) {
 
 		static_assert(
-			std::is_integral<typename std::iterator_traits<InputIt1>::value_type>::value ||
-			std::is_floating_point<typename std::iterator_traits<InputIt1>::value_type>::value ||
-			std::is_integral<typename std::iterator_traits<InputIt2>::value_type>::value ||
-			std::is_floating_point<typename std::iterator_traits<InputIt2>::value_type>::value,
+			std::is_integral_v<typename std::iterator_traits<InputIt1>::value_type> ||
+			std::is_floating_point_v<typename std::iterator_traits<InputIt1>::value_type> ||
+			std::is_integral_v<typename std::iterator_traits<InputIt2>::value_type> ||
+			std::is_floating_point_v<typename std::iterator_traits<InputIt2>::value_type>,
 			"print_data: Data types must be integral or floating point"
 			);
 
@@ -85,13 +82,14 @@ namespace basic_fileIO {
 	// This can be used to save bitmaps of arbitrary types
 	// with a user defined function that gives a transformation rule
 	// I used it to save cufftDoublecomplex phases/intensities
+	// I made some changes needs testing first
 	template <typename T>
 	void save_as_bmp(
-		const std::string& filename, const T* src, 
+		const std::string& filename, const T* src,
 		size_t width, size_t height, std::function<byte(T)> f
 	) {
-		auto InputFirst = src;
-		auto InputLast = std::next(src, width * height);
+		const auto InputFirst = src;
+		const auto InputLast = std::next(src, width * height - 1);
 		std::vector<byte> result(width * height);
 		std::transform(InputFirst, InputLast, result.begin(), f);
 
@@ -100,28 +98,19 @@ namespace basic_fileIO {
 
 	// Read bitmaps
 	void read_from_bmp(
-		const std::string& filename, byte* dst, 
+		const std::string& filename, byte* dst,
 		size_t width, size_t height
 	);
 
-	// More like string operations. If the directory does not exist it will be created
-	std::string create_filepath(
-		const std::string& filename, const std::string& folder = ""
-	);
-
-	void create_nested_directory(
-		const std::string& filepath
-	);
-
 	// Load correction files
-	bool load_LUT(
+	void load_LUT(
 		byte* lut_ptr,
 		size_t lut_patch_num_x, size_t lut_patch_num_y
 	);
 
 	// I would like to pass it as CUDAArray2D but somehow this does not work right now
 	// I think it has something to do with some main source files being cuda files
-	bool load_phase_correction(
+	void load_phase_correction(
 		byte* phase_correction_ptr, unsigned int width, unsigned int height
 	);
 }

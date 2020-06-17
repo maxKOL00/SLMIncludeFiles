@@ -1,9 +1,7 @@
 #pragma once
-//Created by Felix Ronchen
-//Modified by Max Kolanz
 
 #include <iostream> // std::cout
-#include <cmath> // exp, sqrt, atan2
+#include <cmath> // exp, sqrt
 #include <vector> // std::vector
 #include <numeric> // std::iota
 #include <algorithm> // std::for_each
@@ -14,8 +12,7 @@
 #include <cufft.h>
 #include <device_launch_parameters.h>
 
-#include "Constants.h"
-#include <Windows.h>
+#include <Windows.h> // byte
 
 // Useful reoccuring math/statistics functions
 namespace math_utils {
@@ -66,9 +63,6 @@ namespace math_utils {
 	}
 
 	// std-dev for unknown mean, applies bessel correction
-	//This correction is made to correct for the fact that these sample statistics tend 
-	//to underestimate the actual parameters found in the population.
-	//refers to (size - 1) instead of size
 	template<class InputIt>
 	inline double std_dev(
 		const InputIt first, const InputIt last
@@ -80,7 +74,7 @@ namespace math_utils {
 			);
 		double sum_of_squares = 0.0;
 		double total = 0.0;
-		const size_t size = std::distance(first, last);
+		const double size = double(std::distance(first, last));
 		if (size < 2) {
 			throw std::length_error("Array size must be larger than 1");
 		}
@@ -162,8 +156,8 @@ namespace math_utils {
 				int y_min = (std::max)(-gauss_kernel_size / 2, 0 - y);
 				int x_min = (std::max)(-gauss_kernel_size / 2, 0 - x);
 
-				int y_max = (std::min)(gauss_kernel_size / 2 + 1, (int)height - y);
-				int x_max = (std::min)(gauss_kernel_size / 2 + 1, (int)width - x);
+				int y_max = (std::min)(gauss_kernel_size / 2 + 1, height - y);
+				int x_max = (std::min)(gauss_kernel_size / 2 + 1, width - x);
 
 				double local_intensity = 0.0;
 
@@ -176,7 +170,7 @@ namespace math_utils {
 
 						weight = *gaussian_kernel_it;
 
-						local_intensity += weight * src[(y + i_rel) * (int)width + (x + j_rel)];
+						local_intensity += weight * src[(y + i_rel) * width + (x + j_rel)];
 
 						std::advance(gaussian_kernel_it, 1);
 					}
@@ -187,18 +181,18 @@ namespace math_utils {
 	}
 
 	template <typename InputIt, typename T>
-	std::vector<size_t> find_peaks2d(
+	std::vector<unsigned int> find_peaks2d(
 		const InputIt first, const InputIt last,
-		size_t width,
+		unsigned int width,
 		T threshold
 	) {
 		T val = 0;
-		std::vector<size_t> result;
+		std::vector<unsigned int> result;
 
-		const size_t height = std::distance(first, last) / width;
+		const unsigned int height = (unsigned int)(std::distance(first, last) / width);
 
-		for (size_t i = 1; i < height - 1; i++) {
-			for (size_t j = 1; j < width - 1; j++) {
+		for (unsigned int i = 1; i < height - 1u; i++) {
+			for (unsigned int j = 1; j < width - 1u; j++) {
 				val = *std::next(first, i * width + j);
 				if (
 					// Horizontal/vertical terms
@@ -224,21 +218,19 @@ namespace math_utils {
 
 	inline __host__ __device__ double phase(
 		const cufftDoubleComplex& z
-	) {
+	) noexcept {
 		// Not sure if this is actually necessary
-		// atan2 returns 0 for atan2(0,0); - Max
-		/*if ((z.x == 0.0) && (z.y == 0.0)) {
+		if ((z.x == 0.0) && (z.y == 0.0)) {
 			return 0;
-		}*/
-
+		}
 		return atan2(z.y, z.x);
 	}
 
 
 	// Modulus for positive and negative numbers, returns value in range [0, modulus)
-	inline __host__ __device__ size_t mod(int val, size_t modulus) {
+	inline __host__ __device__ int mod(int val, unsigned int modulus) {
 		const int result = val % modulus;
-		return result < 0 ? size_t(result + modulus) : size_t(result);
+		return result < 0 ? result + int(modulus) : result;
 	}
 
 
@@ -299,13 +291,32 @@ namespace math_utils {
 		return false;
 	}
 
+	inline __host__ __device__ bool is_in_square(
+		long long x, long long y,
+		long long x_center, long long y_center,
+		long long side_length
+	) noexcept {
+
+		const long long x_rel = x - x_center;
+		const long long y_rel = y - y_center;
+
+		const bool x_cond = ((-side_length / 2 < x_rel) && (x_rel < side_length / 2));
+		const bool y_cond = ((-side_length / 2 < y_rel) && (y_rel < side_length / 2));
+
+		if (x_cond && y_cond) {
+			return true;
+		}
+		return false;
+	}
+
+
 	// Given a container of flattend 2d indices the elements are row wise
 	// sorted by their x indices
 	template <typename FlattenedIndexContainer>
 	void sort_row_wise_by_x_coordinate(
-		FlattenedIndexContainer first, FlattenedIndexContainer last, size_t width, size_t elements_per_row
+		FlattenedIndexContainer first, FlattenedIndexContainer last, unsigned int width, unsigned int elements_per_row
 	) {
-		if (mod(std::distance(first, last), elements_per_row) != 0) {
+		if (mod(int(std::distance(first, last)), elements_per_row) != 0) {
 			throw std::length_error(
 				"sort_row_wise_by_x_coordinate:\
 				Container size not evenly divisible by elements_per_row"
@@ -313,7 +324,7 @@ namespace math_utils {
 		}
 
 		// Lambda to compare x-coords
-		auto sort_by_x = [width](size_t p1, size_t p2) {
+		auto sort_by_x = [width](const auto p1, const auto p2) {
 			return p1 % width < p2% width;
 		};
 

@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include <Windows.h>
+
 #include "Parameters.h"
 #include "VimbaCPP/Include/VimbaCPP.h"
 #include "statusBox.h"

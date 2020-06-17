@@ -1,5 +1,8 @@
 #pragma once
 //Created by Felix Ronchen
+#include <string>
+#include <filesystem>
+
 #include "math_utils.cuh"
 
 #include <cuda_runtime.h>
@@ -20,8 +23,6 @@ namespace cuda_utils {
         }
     }
     
-
-
     __global__ void pad_array(
         cufftDoubleComplex* __restrict padded_array,
         const cufftDoubleComplex* __restrict unpadded_array,
@@ -37,7 +38,7 @@ namespace cuda_utils {
     __global__ void fft_shift(
         cufftDoubleComplex* __restrict arr_shifted,
         const cufftDoubleComplex* __restrict arr_unshifted,
-        unsigned int N_x, unsigned int N_y        
+        unsigned int N_x, unsigned int N_y
     );
 
     __global__ void multiply_by_quadratic_phase_factor(
@@ -68,7 +69,7 @@ namespace cuda_utils {
     __global__ void extract_phasemap(
         double* __restrict dst,
         const cufftDoubleComplex* __restrict src,
-        bool overwrite// = false
+        bool overwrite = false
     );
 
     __global__ void scale_array(
@@ -81,10 +82,9 @@ namespace cuda_utils {
         double scale_factor
     );
 
-    __global__ void add_phase(
+    __global__ void substitute_phase(
         cufftDoubleComplex* __restrict dst,
-        const double* __restrict src,
-        unsigned int number_of_pixels_padded
+        const double* __restrict src
     );
 
     double get_norm(
@@ -104,4 +104,6 @@ namespace cuda_utils {
         const cufftDoubleComplex* arr,
         unsigned int width, unsigned int height
     );
+
+    
 }

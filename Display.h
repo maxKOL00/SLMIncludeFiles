@@ -7,7 +7,7 @@
 
 #include "helper_functions.h" // StopWatchInterface
 
-#include <Windows.h>
+typedef unsigned char byte;
 
 // External pointers and function to update the bitmap
 //extern byte*				SLM_IMAGE_PTR;
