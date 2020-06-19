@@ -27,6 +27,7 @@ class TweezerArray {
             const Parameters& params, statusBox* box
         );
 
+
         // This could be noexcept because the mask creation already checks if the correct
         // number of peaks is detected
         void update_position_in_camera_image(
@@ -45,6 +46,9 @@ class TweezerArray {
         void update_current_intensities_from_camera_image(
             const byte* camera_image
         );
+
+        void update_plot_positions(int center, int spacing_x_px, int offset_x,
+                              int spacing_y_px, int offset_y);
 
         // In CGHAlgorithm the main WGS loop calculated the weights which are used
         // to update the target amplitude of each tweezer
@@ -89,7 +93,10 @@ class TweezerArray {
         unsigned int get_array_size(
             void
         ) const noexcept;
-
+        int get_x_plot_start() { return x_start_plot; }
+        int get_x_plot_stop() { return x_stop_plot; }
+        int get_y_plot_start() { return y_start_plot; }
+        int get_y_plot_stop() { return y_stop_plot; }
 
     private:
         // 
@@ -106,6 +113,8 @@ class TweezerArray {
     // Resolutions in padded Fourier space when delta k
     // is transformed by the scale factor wavelenghth * focal_length
     double delta_x_padded_um;
+
+    int y_start_plot, y_stop_plot, x_start_plot, x_stop_plot;
 
     // waist_px also declared as double to avoid rounding errors if possible
     double waist_um, waist_px_in_fft, waist_px_in_camera_image;

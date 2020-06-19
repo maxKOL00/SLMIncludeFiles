@@ -64,7 +64,11 @@ class CGHAlgorithm {
         ) const;
 
         void save_output_intensity_distribution(
-            const std::string& filename
+            const std::string& filename, TweezerArray tweezer_array
+        ) const;
+
+        void save_output_intensity_distribution_max(
+            const std::string& filename, TweezerArray tweezer_array
         ) const;
 
     private:
