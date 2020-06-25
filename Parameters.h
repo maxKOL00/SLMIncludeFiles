@@ -20,7 +20,8 @@ struct ParameterError : public std::runtime_error {
 
 class Parameters {
     public:
-    explicit Parameters();
+    //explicit Parameters();
+    Parameters::Parameters(std::string filename);
 
     // Delete copy and copy assignment
     // I have no idea why but this generates in error when a parameter instance
