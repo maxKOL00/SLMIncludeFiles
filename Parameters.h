@@ -47,7 +47,7 @@ class Parameters {
     unsigned int        get_number_of_lut_patches_y() const;
 
     unsigned int        get_grating_period_px() const;
-
+    unsigned int        get_grating_diff() const;
     unsigned int        get_horizontal_offset() const;
 
     byte                get_blazed_grating_max() const;
