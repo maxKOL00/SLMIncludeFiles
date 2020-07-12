@@ -113,4 +113,9 @@ namespace basic_fileIO {
 	void load_phase_correction(
 		byte* phase_correction_ptr, unsigned int width, unsigned int height
 	);
+
+	std::string create_filepath(
+		const std::string& filename, const std::string& folder
+	);
+
 }

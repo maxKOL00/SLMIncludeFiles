@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 #include "statusBox.h"
+#include "ImageProcessing.cuh"
 
 #include "Parameters.h"
 #include "TweezerArray.h"
